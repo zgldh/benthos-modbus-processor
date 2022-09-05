@@ -22,7 +22,8 @@ docker build . -t benthos_modbus_processor
 pipeline:
   processors:
     - modbus:
-        data_length:
+        bytes_per_address: 2      # Optional, default 2
+        data_length:              # Bytes length not Address length.
           starting_address: 0x02  # Optional, default 0x02
           num_bytes: 2            # Optional, default 2
           big_endian: true        # Optional, default true
@@ -34,7 +35,7 @@ pipeline:
             name: "ThermostatL"
             attributes:
               starting_address: 0x10
-              raw_type: "Int16"
+              raw_type: "Int16"   # Int16, Uint16, 
               big_endian: true    # Optional, default true.
             properties:
               value_type: "Float32"
@@ -42,7 +43,7 @@ pipeline:
           -
             name: "ThermostatH"
             attributes:
-              starting_address: 0x12
+              starting_address: 0x11
               raw_type: "Int16"
               big_endian: true    # Optional, default true.
             properties:
@@ -51,13 +52,14 @@ pipeline:
           -
             name: "AlarmMode"
             attributes:
-              { starting_address: 0x14 }
+              starting_address: 0x12
+              raw_type: "Int16"
             properties:
               value_type: "Int16"
           -
             name: "Temperature"
             attributes:
-              starting_address: 0x16
+              starting_address: 0x13
               raw_type: "Int16"
               big_endian: true    # Optional, default true.
             properties:
