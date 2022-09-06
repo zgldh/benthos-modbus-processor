@@ -28,9 +28,9 @@ const (
 )
 
 type ConfigDataLength struct {
-	StartingAddress int
-	NumBytes        int
-	BigEndian       bool
+	ByteIndex int
+	NumBytes  int
+	BigEndian bool
 }
 
 type ConfigCrc16 struct {
@@ -72,9 +72,9 @@ func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*Mo
 		bytes_per_address = 2
 	}
 
-	data_length__starting_address, err := conf.FieldInt("data_length", "starting_address")
+	data_length__byte_index, err := conf.FieldInt("data_length", "byte_index")
 	if err != nil {
-		data_length__starting_address = 2
+		data_length__byte_index = 2
 	}
 	data_length__num_bytes, err := conf.FieldInt("data_length", "num_bytes")
 	if err != nil {
@@ -145,9 +145,9 @@ func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*Mo
 		config: &ModbusProcessorConfig{
 			BytesPerAddress: bytes_per_address,
 			DataLength: ConfigDataLength{
-				StartingAddress: data_length__starting_address,
-				NumBytes:        data_length__num_bytes,
-				BigEndian:       data_length__big_endian,
+				ByteIndex: data_length__byte_index,
+				NumBytes:  data_length__num_bytes,
+				BigEndian: data_length__big_endian,
 			},
 			Crc16: ConfigCrc16{
 				Enabled:   crc16__enabled,
@@ -164,7 +164,7 @@ func init() {
 		Summary("Creates a processor for Modbus data.").
 		Field(service.NewIntField("bytes_per_address").Advanced().Default(2)).
 		Field(service.NewObjectField("data_length",
-			service.NewIntField("starting_address").Default(0x02),
+			service.NewIntField("byte_index").Default(0x02),
 			service.NewIntField("num_bytes").Default(2),
 			service.NewBoolField("big_endian").Default(true),
 		).Advanced().Default(ConfigDataLength{2, 2, true})).

@@ -22,11 +22,11 @@ docker build . -t benthos_modbus_processor
 pipeline:
   processors:
     - modbus:
-        bytes_per_address: 2      # Optional, default 2
+        bytes_per_address: 2      # Optional, default 2. How many bytes per address for fields.
         data_length:              # Bytes length not Address length.
-          starting_address: 0x02  # Optional, default 0x02
-          num_bytes: 2            # Optional, default 2
-          big_endian: true        # Optional, default true
+          byte_index: 0x02        # Optional, default 0x02. The index of the first byte for data length.
+          num_bytes: 2            # Optional, default 2. How many bytes to identify the data length.
+          big_endian: true        # Optional, default true.
         crc16:
           enabled: true           # Optional, default true. It will throw exception if enabled and crc16 checking failed.
           big_endian: true        # Optional, default true
@@ -73,7 +73,7 @@ Meta Data
 {
   "modbus_crc_checked": true,
   "modbus_bytes_length": 123,
-  "modbus_slave_id": 1
+  "modbus_slave_address": 1
 }
 
 Payload
