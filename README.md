@@ -38,8 +38,8 @@ pipeline:
               raw_type: "Int16"   # Int16, Uint16, 
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float32"
-              scale: "0.1"
+              value_type: "Float"
+              scale: 0.1
           -
             name: "ThermostatH"
             attributes:
@@ -47,15 +47,15 @@ pipeline:
               raw_type: "Int16"
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float32"
-              scale: "0.1"
+              value_type: "Float"
+              scale: 0.1
           -
             name: "AlarmMode"
             attributes:
               starting_address: 0x12
               raw_type: "Int16"
             properties:
-              value_type: "Int16"
+              value_type: "Int"
           -
             name: "Temperature"
             attributes:
@@ -63,6 +63,24 @@ pipeline:
               raw_type: "Int16"
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float32"
-              scale: "0.1"
+              value_type: "Float"
+              scale: 0.1
+```
+
+
+```json
+Meta Data
+{
+  "modbus_crc_checked": true,
+  "modbus_bytes_length": 123,
+  "modbus_slave_id": 1
+}
+
+Payload
+{
+  "ThermostatL": 123.345,
+  "ThermostatH": 123.345,
+  "AlarmMode": 123.345,
+  "Temperature": 123.345,
+}
 ```

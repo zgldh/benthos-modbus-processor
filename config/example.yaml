@@ -1,3 +1,10 @@
+input:
+  label: "s"
+  generate:
+    mapping: root = "hello world"
+    interval: 1s
+    count: 0
+    batch_size: 1
 
 pipeline:
   processors:
@@ -14,32 +21,36 @@ pipeline:
             name: "ThermostatL"
             attributes:
               starting_address: 0x10
-              raw_type: "Int16"
+              raw_type: "Int16"   # Int16, Uint16, 
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float32"
-              scale: "0.1"
+              value_type: "Float"
+              scale: 0.1
           -
             name: "ThermostatH"
             attributes:
-              starting_address: 0x12
+              starting_address: 0x11
               raw_type: "Int16"
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float32"
-              scale: "0.1"
+              value_type: "Float"
+              scale: 0.1
           -
             name: "AlarmMode"
             attributes:
-              { starting_address: 0x14 }
+              starting_address: 0x12
+              raw_type: "Int16"
             properties:
-              value_type: "Int16"
+              value_type: "Int"
           -
             name: "Temperature"
             attributes:
-              starting_address: 0x16
+              starting_address: 0x13
               raw_type: "Int16"
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float32"
-              scale: "0.1"
+              value_type: "Float"
+              scale: 0.1
+              
+output:
+  stdout: {}
