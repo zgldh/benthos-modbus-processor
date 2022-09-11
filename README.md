@@ -27,9 +27,10 @@ pipeline:
           byte_index: 0x02        # Optional, default 0x02. The index of the first byte for data length.
           num_bytes: 2            # Optional, default 2. How many bytes to identify the data length.
           big_endian: true        # Optional, default true.
-        crc16:
-          enabled: true           # Optional, default true. It will throw exception if enabled and crc16 checking failed.
-          big_endian: true        # Optional, default true
+        crc_checking:
+          enabled: true           # Optional, default true. The CRC matching value is the last 2, 4 or 8  bytes. It will take all bytes before the CRC matching value to get calculated CRC value.  It will throw exception if enabled and crc checking failed.
+          type: MODBUS            # Optional, default MODBUS. Options: X25, CCITT, MODBUS, CRC16, XMODEM, XMODEM2, CRC32, IEEE, Castagnoli, CRC32C, Koopman, CRC64ISO, CRC64ECMA
+          big_endian: false       # Optional, default true
         fields:
           -
             name: "ThermostatL"

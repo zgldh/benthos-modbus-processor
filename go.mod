@@ -172,6 +172,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/smira/go-statsd v1.3.2 // indirect
+	github.com/snksoft/crc v1.1.0 // indirect
 	github.com/snowflakedb/gosnowflake v1.6.6 // indirect
 	github.com/stretchr/testify v1.7.5 // indirect
 	github.com/tilinna/z85 v1.0.0 // indirect
