@@ -47,7 +47,7 @@ const (
 
 type ConfigDataLength struct {
 	ByteIndex int
-	NumBytes  int
+	BytesNum  int
 	BigEndian bool
 }
 
@@ -97,9 +97,9 @@ func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*Mo
 	if err != nil {
 		data_length__byte_index = 2
 	}
-	data_length__num_bytes, err := conf.FieldInt("data_length", "num_bytes")
+	data_length__bytes_num, err := conf.FieldInt("data_length", "bytes_num")
 	if err != nil {
-		data_length__num_bytes = 2
+		data_length__bytes_num = 2
 	}
 	data_length__big_endian, err := conf.FieldBool("data_length", "big_endian")
 	if err != nil {
@@ -176,7 +176,7 @@ func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*Mo
 			BytesPerAddress: bytes_per_address,
 			DataLength: ConfigDataLength{
 				ByteIndex: data_length__byte_index,
-				NumBytes:  data_length__num_bytes,
+				BytesNum:  data_length__bytes_num,
 				BigEndian: data_length__big_endian,
 			},
 			CrcChecking: ConfigCrcChecking{
@@ -198,7 +198,7 @@ func init() {
 		Field(service.NewIntField("bytes_per_address").Advanced().Default(2)).
 		Field(service.NewObjectField("data_length",
 			service.NewIntField("byte_index").Default(0x02),
-			service.NewIntField("num_bytes").Default(2),
+			service.NewIntField("bytes_num").Default(1).LintRule(`root = if false == [1,2,4,8].contains(this.number()) { [ "data_length.bytes_num can only be 1, 2, 4 or 8." ] }`),
 			service.NewBoolField("big_endian").Default(true),
 		).Advanced().Default(ConfigDataLength{2, 2, true})).
 		Field(service.NewObjectField("crc_checking",
@@ -242,6 +242,27 @@ func (r *ModbusProcessor) Process(ctx context.Context, m *service.Message) (serv
 	// }
 
 	// CRC checking
+	err = r.processCRC(bytesContent, m)
+	if err != nil {
+		return nil, err
+	}
+
+	// Data length
+	dataLength, err := r.processDataLength(bytesContent, m)
+	if err != nil {
+		return nil, err
+	}
+	dataLength = dataLength + 0
+
+	m.SetBytes([]byte{})
+	return []*service.Message{m}, nil
+}
+
+func (r *ModbusProcessor) Close(ctx context.Context) error {
+	return nil
+}
+
+func (r *ModbusProcessor) processCRC(bytesContent []byte, m *service.Message) error {
 	if r.config.CrcChecking.Enabled {
 		isCrcChecked, err := r.getCrcCheckingResult(bytesContent)
 		if err != nil {
@@ -251,16 +272,50 @@ func (r *ModbusProcessor) Process(ctx context.Context, m *service.Message) (serv
 			m.MetaSet("modbus_crc_checked", "true")
 		} else {
 			m.MetaSet("modbus_crc_checked", "false")
-			return nil, errors.New("CRC checking failed")
+			return errors.New("CRC checking failed")
+		}
+	}
+	return nil
+}
+
+func (r *ModbusProcessor) processDataLength(bytesContent []byte, m *service.Message) (uint64, error) {
+	var length uint64
+	var err error
+	lengthRawBytes := bytesContent[r.config.DataLength.ByteIndex : r.config.DataLength.ByteIndex+r.config.DataLength.BytesNum]
+	if r.config.DataLength.BigEndian {
+		if r.config.DataLength.BytesNum == 1 {
+			length = uint64(lengthRawBytes[0])
+		} else if r.config.DataLength.BytesNum == 2 {
+			length = uint64(binary.BigEndian.Uint16(lengthRawBytes))
+		} else if r.config.DataLength.BytesNum == 4 {
+			length = uint64(binary.BigEndian.Uint32(lengthRawBytes))
+
+		} else if r.config.DataLength.BytesNum == 8 {
+			length = binary.BigEndian.Uint64(lengthRawBytes)
+		} else {
+			err = errors.New("Data length parse failed")
+		}
+	} else {
+		if r.config.DataLength.BytesNum == 1 {
+			length = uint64(lengthRawBytes[0])
+		} else if r.config.DataLength.BytesNum == 2 {
+			length = uint64(binary.LittleEndian.Uint16(lengthRawBytes))
+		} else if r.config.DataLength.BytesNum == 4 {
+			length = uint64(binary.LittleEndian.Uint32(lengthRawBytes))
+
+		} else if r.config.DataLength.BytesNum == 8 {
+			length = binary.LittleEndian.Uint64(lengthRawBytes)
+		} else {
+			err = errors.New("Data length parse failed")
 		}
 	}
 
-	m.SetBytes([]byte{})
-	return []*service.Message{m}, nil
-}
-
-func (r *ModbusProcessor) Close(ctx context.Context) error {
-	return nil
+	if err != nil {
+		return 0, err
+	} else {
+		m.MetaSet("modbus_data_length", fmt.Sprintf("%v", length))
+		return length, nil
+	}
 }
 
 func (r *ModbusProcessor) getCrcCheckingResult(bytesContent []byte) (bool, error) {
