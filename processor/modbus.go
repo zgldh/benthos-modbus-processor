@@ -247,12 +247,25 @@ func (r *ModbusProcessor) Process(ctx context.Context, m *service.Message) (serv
 		return nil, err
 	}
 
+	// Slave address
+	slaveAddress := uint(bytesContent[0])
+	m.MetaSet("modbus_slave_address", fmt.Sprintf("%v", slaveAddress))
+
+	// Function number
+	functionNumber := uint(bytesContent[1])
+	m.MetaSet("modbus_function", fmt.Sprintf("%v", functionNumber))
+
 	// Data length
 	dataLength, err := r.processDataLength(bytesContent, m)
 	if err != nil {
 		return nil, err
 	}
-	dataLength = dataLength + 0
+
+	// Data fields parsing
+	err = r.processDataFields(bytesContent, m, dataLength)
+	if err != nil {
+		return nil, err
+	}
 
 	m.SetBytes([]byte{})
 	return []*service.Message{m}, nil
@@ -316,6 +329,10 @@ func (r *ModbusProcessor) processDataLength(bytesContent []byte, m *service.Mess
 		m.MetaSet("modbus_data_length", fmt.Sprintf("%v", length))
 		return length, nil
 	}
+}
+
+func (r *ModbusProcessor) processDataFields(bytesContent []byte, m *service.Message, length uint64) error {
+	return nil
 }
 
 func (r *ModbusProcessor) getCrcCheckingResult(bytesContent []byte) (bool, error) {
