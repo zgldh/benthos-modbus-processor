@@ -33,39 +33,40 @@ pipeline:
           big_endian: false       # Optional, default true
         fields:
           -
-            name: "ThermostatL"
+            name: "SwitchOn"
             attributes:
-              starting_address: 0x10
-              raw_type: "Int16"   # Int16, Uint16, 
+              starting_address: 0x00
+              raw_type: "Int16"   # Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float"
-              scale: 0.1
+              value_type: "Bool"
           -
-            name: "ThermostatH"
+            name: "F"
             attributes:
-              starting_address: 0x11
+              starting_address: 0x04
               raw_type: "Int16"
-              big_endian: true    # Optional, default true.
+              big_endian: true      # Optional, default true.
             properties:
               value_type: "Float"
-              scale: 0.1
+              mapping: root = this.number() * 0.1 # Optional, default empty. 
+                                                  # The mapping input `this` will be the raw_type that conveted from bytes array. 
+                                                  # The mapping result `root` will be converted to the value_type.
           -
-            name: "AlarmMode"
+            name: "AU"
             attributes:
-              starting_address: 0x12
+              starting_address: 0x08
               raw_type: "Int16"
             properties:
               value_type: "Int"
           -
-            name: "Temperature"
+            name: "A_Power"
             attributes:
-              starting_address: 0x13
-              raw_type: "Int16"
+              starting_address: 14
+              raw_type: "UInt32"
               big_endian: true    # Optional, default true.
             properties:
               value_type: "Float"
-              scale: 0.1
+              mapping: root = this.number() * 0.001
 ```
 
 
