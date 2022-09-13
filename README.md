@@ -18,6 +18,8 @@ docker build . -t benthos-modbus-processor
 
 ## Usage
 
+`docker run --rm -v /path/to/yaml:/benthos.yaml zgldh/benthos-modbus-processor:v1.0.2`
+
 ```yaml
 pipeline:
   processors:
