@@ -5,6 +5,8 @@ RUN useradd -u 10001 benthos
 WORKDIR /build/
 COPY . /build/
 
+RUN go mod vendor
+
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor
 
 FROM busybox AS package
