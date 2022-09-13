@@ -25,14 +25,41 @@ pipeline:
             properties:
               mapping: root = rawValue == 240
           -
-            name: "SwitchOffLog_1234"
+            name: "SwitchOffLog_1"
             attributes:
               starting_address: 3
               raw_type: "UInt16"  # Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64
               big_endian: true    # Optional, default true.
             properties:
               mapping: |
-                root =   "%5.0f".format(rawValue).encode("hex")
+                root = (rawValue / 256 / 16).floor()
+          -
+            name: "SwitchOffLog_2"
+            attributes:
+              starting_address: 3
+              raw_type: "UInt16"  # Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64
+              big_endian: true    # Optional, default true.
+            properties:
+              mapping: |
+                root = (rawValue / 256 % 16).floor()
+          -
+            name: "SwitchOffLog_3"
+            attributes:
+              starting_address: 3
+              raw_type: "UInt16"  # Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64
+              big_endian: true    # Optional, default true.
+            properties:
+              mapping: |
+                root = (rawValue % 256 / 16).floor()
+          -
+            name: "SwitchOffLog_4"
+            attributes:
+              starting_address: 3
+              raw_type: "UInt16"  # Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64
+              big_endian: true    # Optional, default true.
+            properties:
+              mapping: |
+                root = (rawValue % 256 % 16).floor()
           -
             name: "F"
             attributes:

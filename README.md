@@ -44,18 +44,18 @@ pipeline:
             name: "F"
             attributes:
               starting_address: 0x04
-              raw_type: "Int16"
+              raw_type: "UInt16"
               big_endian: true      # Optional, default true.
             properties:
               si_unit: "Hz"
-              mapping: root = this.number() / 10  # Optional, default empty. 
-                                                  # The mapping input `this` will be the raw_type that conveted from bytes array. 
-                                                  # The mapping result `root` will be converted to the value_type.
+              mapping: root = rawValue / 10   # Optional, default empty. 
+                                              # The mapping input `rawValue` will be the raw_type that conveted from bytes array. 
+                                              # The mapping result `root` will be converted to the value_type.
           -
             name: "AU"
             attributes:
               starting_address: 0x08
-              raw_type: "Int16"
+              raw_type: "UInt16"
             properties:
               si_unit: "V"
           -
