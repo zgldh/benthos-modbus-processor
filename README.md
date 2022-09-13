@@ -39,7 +39,7 @@ pipeline:
               raw_type: "Int16"   # Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Bool"
+              mapping: root = rawValue == 240
           -
             name: "F"
             attributes:
@@ -47,8 +47,8 @@ pipeline:
               raw_type: "Int16"
               big_endian: true      # Optional, default true.
             properties:
-              value_type: "Float"
-              mapping: root = this.number() * 0.1 # Optional, default empty. 
+              si_unit: "Hz"
+              mapping: root = this.number() / 10  # Optional, default empty. 
                                                   # The mapping input `this` will be the raw_type that conveted from bytes array. 
                                                   # The mapping result `root` will be converted to the value_type.
           -
@@ -57,7 +57,7 @@ pipeline:
               starting_address: 0x08
               raw_type: "Int16"
             properties:
-              value_type: "Int"
+              si_unit: "V"
           -
             name: "A_Power"
             attributes:
@@ -65,8 +65,8 @@ pipeline:
               raw_type: "UInt32"
               big_endian: true    # Optional, default true.
             properties:
-              value_type: "Float"
-              mapping: root = this.number() * 0.001
+              si_unit: "kW·h"
+              mapping: root = rawValue / 1000
 ```
 
 
@@ -81,9 +81,21 @@ Meta Data
 
 Payload
 {
-  "ThermostatL": 123.345,
-  "ThermostatH": 123.345,
-  "AlarmMode": 123.345,
-  "Temperature": 123.345,
+  "SwitchOn": {
+    "Value": true,
+    "SIUnit": ""
+  },
+  "F": {
+    "Value": 49.9,
+    "SIUnit": "Hz"
+  },
+  "AU": {
+    "Value": 230,
+    "SIUnit": "V"
+  },
+  "A_Power": {
+    "Value": 775.65,
+    "SIUnit": "kW·h"
+  }
 }
 ```

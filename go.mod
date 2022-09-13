@@ -2,7 +2,10 @@ module github.com/zgldh/benthos_modbus_processor
 
 go 1.17
 
-require github.com/benthosdev/benthos/v4 v4.6.0
+require (
+	github.com/benthosdev/benthos/v4 v4.6.0
+	github.com/snksoft/crc v1.1.0
+)
 
 require (
 	cloud.google.com/go v0.100.2 // indirect
@@ -172,7 +175,6 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/smira/go-statsd v1.3.2 // indirect
-	github.com/snksoft/crc v1.1.0 // indirect
 	github.com/snowflakedb/gosnowflake v1.6.6 // indirect
 	github.com/stretchr/testify v1.7.5 // indirect
 	github.com/tilinna/z85 v1.0.0 // indirect

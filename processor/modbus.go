@@ -46,14 +46,6 @@ const (
 	Float64 RawType = "Float64"
 )
 
-type ValueType string
-
-const (
-	Int   RawType = "Int"
-	Float RawType = "Float"
-	Bool  RawType = "Bool"
-)
-
 type ConfigDataLength struct {
 	ByteIndex int
 	BytesNum  int
@@ -73,8 +65,8 @@ type ConfigFieldAttributes struct {
 }
 
 type ConfigFieldProperties struct {
-	ValueType ValueType // "Int", "Float", "Bool"
-	Mapping   *bloblang.Executor
+	SIUnit  string
+	Mapping *bloblang.Executor
 }
 
 type ConfigField struct {
@@ -94,6 +86,11 @@ type ModbusProcessor struct {
 	crcHash                   *crc.Hash
 	crcHashMatchingBytesCount int
 	logger                    *service.Logger
+}
+
+type FieldValue struct {
+	Value  interface{}
+	SIUnit string
 }
 
 func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*ModbusProcessor, error) {
@@ -153,10 +150,11 @@ func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*Mo
 			attributes_big_endian = true
 		}
 
-		properties_value_type, err := configField.FieldString("properties", "value_type")
+		properties_si_unit, err := configField.FieldString("properties", "si_unit")
 		if err != nil {
-			return nil, fmt.Errorf("field '%v' properties.value_type is required", name)
+			properties_si_unit = ""
 		}
+
 		properties_mapping, err := configField.FieldBloblang("properties", "mapping")
 		if err != nil {
 			properties_mapping = nil
@@ -170,8 +168,8 @@ func newModbusProcessor(conf *service.ParsedConfig, logger *service.Logger) (*Mo
 				BigEndian:       attributes_big_endian,
 			},
 			Properties: ConfigFieldProperties{
-				ValueType: ValueType(properties_value_type),
-				Mapping:   properties_mapping,
+				SIUnit:  properties_si_unit,
+				Mapping: properties_mapping,
 			},
 		}
 	}
@@ -225,7 +223,7 @@ func init() {
 				service.NewBoolField("big_endian").Default(true),
 			),
 			service.NewObjectField("properties",
-				service.NewStringEnumField("value_type", "Int", "Float", "Bool"), // TODO
+				service.NewStringField("si_unit").Optional(),
 				service.NewBloblangField("mapping").Optional(),
 			),
 		))
@@ -351,6 +349,8 @@ func (r *ModbusProcessor) processDataFields(bytesContent []byte, m *service.Mess
 		sliceStart := field.Attributes.StartingAddress*r.config.BytesPerAddress + offset
 		sliceEnd := sliceStart + rawBytesNum
 		bytesSlice := bytesContent[sliceStart:sliceEnd]
+		var rawValue float64
+		var fieldValue FieldValue
 
 		if field.Attributes.BigEndian {
 			byteOrder = binary.BigEndian
@@ -360,91 +360,73 @@ func (r *ModbusProcessor) processDataFields(bytesContent []byte, m *service.Mess
 
 		buff := bytes.NewReader(bytesSlice)
 		if field.Attributes.RawType == Int8 {
-			var rawValue int8
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue int8
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == Int16 {
-			var rawValue int16
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			if field.Properties.Mapping != nil {
-				mappedResult, err := field.Properties.Mapping.Query(rawValue)
-				if err != nil {
-					log.Println("Mapping failed", err)
-					return nil, err
-				}
-				result[field.Name] = mappedResult
-			} else {
-				result[field.Name] = rawValue
-			}
+			var readedValue int16
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == Int32 {
-			var rawValue int32
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue int32
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == Int64 {
-			var rawValue int64
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue int64
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == UInt8 {
-			var rawValue uint8
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue uint8
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == UInt16 {
-			var rawValue uint16
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue uint16
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == UInt32 {
-			var rawValue uint32
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue uint32
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == UInt64 {
-			var rawValue uint64
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue uint64
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == Float32 {
-			var rawValue float32
-			err = binary.Read(buff, byteOrder, &rawValue)
-			if err != nil {
-				return nil, err
-			}
-			result[field.Name] = rawValue
+			var readedValue float32
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
 		} else if field.Attributes.RawType == Float64 {
-			var rawValue float64
-			err = binary.Read(buff, byteOrder, &rawValue)
+			var readedValue float64
+			err = binary.Read(buff, byteOrder, &readedValue)
+			rawValue = float64(readedValue)
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		if field.Properties.Mapping != nil {
+			mappedResult, err := field.Properties.Mapping.Query(map[string]interface{}{
+				"rawValue": rawValue,
+			})
 			if err != nil {
+				log.Println("Mapping failed: ", err)
 				return nil, err
 			}
-			result[field.Name] = rawValue
+			fieldValue = FieldValue{
+				Value: mappedResult,
+			}
+		} else {
+			fieldValue = FieldValue{
+				Value: rawValue,
+			}
 		}
+
+		if field.Properties.SIUnit != "" {
+			fieldValue.SIUnit = field.Properties.SIUnit
+		}
+
+		result[field.Name] = fieldValue
 	}
-	// excuter, err := bloblang.Parse("")
-	// if err != nil {
-	// 	return err
-	// }
-	// excuter.Query()
 	return result, nil
 }
 
