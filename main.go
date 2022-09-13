@@ -9,7 +9,7 @@ import (
 	_ "github.com/benthosdev/benthos/v4/public/components/all"
 
 	// Add your plugin packages here
-	_ "github.com/zgldh/benthos_modbus_processor/processor"
+	_ "github.com/zgldh/benthos-modbus-processor/processor"
 )
 
 func main() {

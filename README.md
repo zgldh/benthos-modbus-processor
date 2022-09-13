@@ -13,7 +13,7 @@ Alternatively build it as a Docker image with:
 
 ```sh
 go mod vendor
-docker build . -t benthos_modbus_processor
+docker build . -t benthos-modbus-processor
 ```
 
 ## Usage

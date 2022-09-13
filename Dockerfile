@@ -15,17 +15,17 @@ WORKDIR /
 
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /build/benthos_modbus_processor .
+COPY --from=build /build/benthos-modbus-processor .
 COPY ./config/example.yaml /benthos.yaml
 
 RUN mkdir /logs
-# RUN chown benthos:10001 benthos_modbus_processor
+# RUN chown benthos:10001 benthos-modbus-processor
 RUN chown -R benthos:10001 /logs
 
 USER benthos
 
 EXPOSE 4195
 
-ENTRYPOINT ["/benthos_modbus_processor"]
+ENTRYPOINT ["/benthos-modbus-processor"]
 
 CMD ["-c", "/benthos.yaml"]

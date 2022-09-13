@@ -1,4 +1,4 @@
-module github.com/zgldh/benthos_modbus_processor
+module github.com/zgldh/benthos-modbus-processor
 
 go 1.17
 
