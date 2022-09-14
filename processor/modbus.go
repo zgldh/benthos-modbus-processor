@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/benthosdev/benthos/v4/public/bloblang"
 	"github.com/benthosdev/benthos/v4/public/service"
@@ -409,7 +408,6 @@ func (r *ModbusProcessor) processDataFields(bytesContent []byte, m *service.Mess
 				"rawValue": rawValue,
 			})
 			if err != nil {
-				log.Println("Mapping failed: ", err)
 				return nil, err
 			}
 			fieldValue = FieldValue{
